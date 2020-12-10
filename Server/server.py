@@ -4,20 +4,26 @@ from hashlib import sha256
 import os
 import uuid
 import json
+import facebook
 app = Flask(__name__)
 
-# curl -H "Content-Type: application/json" -X POST -d '{"email":"erick@b.com","password":"1234"}' localhost:5000/pior_login_do_mundo
-# curl -H "Content-Type: application/json" -X POST -d '{"token":"24717128-38bc-4c05-adc0-10d3a4a2f31d","user_id":"1ca0d4d6a1cd8fc07158580fcddb15968a25bcd55cc5c50d9a7152617653ec46", "clicks":3}' localhost:5000/set_clicks
-def hello_world():
-    return 'Hello, 2!'
-
-@app.route('/pior_login_do_mundo', methods=['POST'])
-def pior_login_do_mundo():
+@app.route('/facebook_login', methods=['POST'])
+def facebook_login():
     
     data = request.get_json()
-    user_info = create_user(data)
+    facebook_token = data["facebook_token"]
+    facebook_user_id = data["facebook_user_id"]
+
+    graph = facebook.GraphAPI(access_token=facebook_token)
+    me = graph.get_object(id='me')
+
+    if me['id']!=facebook_user_id:
+        raise Exception()
    
+    user_info = login_user(facebook_user_id)
+
     return jsonify(user_info)
+
 
 @app.route('/set_clicks', methods=['POST'])
 def set_clicks():
@@ -33,6 +39,7 @@ def set_clicks():
     f = open(filename, "w")
     f.write(json.dumps(saved_infos))
     f.close()
+
     return jsonify({})
 
 def validate_user(user_id,token):
@@ -51,17 +58,14 @@ def validate_user(user_id,token):
    
     return saved_infos
     
-def create_user(credentials):
-    email = credentials["email"]
-    password = credentials["password"]
+def login_user(facebook_id):
     token = str(uuid.uuid4())
-    user_id = sha256(email.encode('utf-8')).hexdigest()
+    user_id = sha256(facebook_id.encode('utf-8')).hexdigest()
   
     filename = "./"+user_id+".txt"
 
     saved_infos = {
-        "email" : email,
-        "password" : password,
+        "facebook_id" : facebook_id,
         "token" : token,
         "clicks" : 0
     }
@@ -71,18 +75,15 @@ def create_user(credentials):
         f.write(json.dumps(saved_infos))
         f.close()
     else:
-        saved_infos = update_token(filename,token,password)
+        saved_infos = update_token(filename,token)
 
     return {"token": token,"user_id":user_id, "clicks": saved_infos["clicks"]}
 
-def update_token(filename,new_token, password):
+def update_token(filename,new_token):
       f = open(filename, "r+")
       file_content = f.read()
       saved_infos = json.loads(file_content)
-      
-      if saved_infos["password"] != password:
-          raise Exception()
-          
+                
       saved_infos["token"] = new_token
       
       f.seek(0)

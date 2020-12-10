@@ -35,11 +35,8 @@ public class FacebookLoginControler : MonoBehaviour
                
                 var aToken = AccessToken.CurrentAccessToken;
                 Debug.Log(aToken.UserId);
-          
-                foreach (string perm in aToken.Permissions)
-                {
-                    Debug.Log(perm);
-                }
+
+                StartCoroutine(LoginCorrotine(aToken.UserId, aToken.TokenString));
             }
             else
             {
@@ -50,19 +47,20 @@ public class FacebookLoginControler : MonoBehaviour
 
     }
 
-    /* IEnumerator LoginCorrotine()
+     IEnumerator LoginCorrotine(string facebookUser, string facebookAcessToken)
      {
          var data = new Dictionary<string, string>
          {
-             { "email", _email.text },
-             { "password",_password.text},
+             { "facebook_user_id",facebookUser },
+             { "facebook_token", facebookAcessToken },
+             
          };
 
          string toSend = JsonConvert.SerializeObject(data);
          byte[] bytesToSend = Encoding.UTF8.GetBytes(toSend);
 
          Debug.Log($"Sending... {toSend}");
-         using (UnityWebRequest www = new UnityWebRequest("http://localhost:5000/pior_login_do_mundo", UnityWebRequest.kHttpVerbPOST))
+         using (UnityWebRequest www = new UnityWebRequest("http://localhost:5000/facebook_login", UnityWebRequest.kHttpVerbPOST))
          {
              www.SetRequestHeader("Content-Type", "application/json");
              www.uploadHandler = new UploadHandlerRaw(bytesToSend);
@@ -81,12 +79,12 @@ public class FacebookLoginControler : MonoBehaviour
                  {
                      var result = JObject.Parse(text);
 
-                     ClicksController._userId = result["user_id"].Value<string>();
-                     ClicksController._accessToken = result["token"].Value<string>();
-                     ClicksController._totalClicks = result["clicks"].Value<uint>();
+                    ClicksController._userId = result["user_id"].Value<string>();
+                    ClicksController._accessToken = result["token"].Value<string>();
+                    ClicksController._totalClicks = result["clicks"].Value<uint>();
                      Debug.Log(result);
 
-                     SceneManager.LoadScene(1);
+                    SceneManager.LoadScene(1);
 
 
                  }
@@ -96,5 +94,5 @@ public class FacebookLoginControler : MonoBehaviour
                  }
              }
          }
-     }*/
+     }
 }
