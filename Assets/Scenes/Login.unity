@@ -234,8 +234,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70dd7b0264bad994685ada3c3e40bd37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _email: {fileID: 0}
-  _password: {fileID: 0}
 --- !u!1 &283829858
 GameObject:
   m_ObjectHideFlags: 0
@@ -458,7 +456,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 135441634}
         m_MethodName: OnLogin
         m_Mode: 1
         m_Arguments:
